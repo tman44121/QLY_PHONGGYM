@@ -1,6 +1,6 @@
 # The Gym — hệ thống quản lý phòng tập
 
-Ứng dụng web Laravel phục vụ quy trình hội viên của một phòng tập: khách xem và mua gói, nhân viên xác nhận khoản thu và ghi nhận lượt tập, quản lý theo dõi gói cùng doanh thu. Phạm vi và quy tắc nghiệp vụ được ghi tại [tài liệu nghiệp vụ](docs/nghiep-vu-goi-hoi-vien.md).
+Ứng dụng web Laravel phục vụ quy trình hội viên của một phòng tập: khách xem và mua gói, nhân viên xác nhận khoản thu và ghi nhận lượt tập, quản lý theo dõi gói cùng doanh thu. Trợ lý RAG hỗ trợ hỏi đáp nghiệp vụ trên website. Phạm vi và quy tắc nghiệp vụ được ghi tại [tài liệu nghiệp vụ](docs/nghiep-vu-goi-hoi-vien.md).
 
 ## Cấu trúc repository
 
@@ -15,7 +15,8 @@
 - **Khách vãng lai:** xem gói đang mở bán, chi tiết giá/thời hạn và gửi yêu cầu tập thử. Yêu cầu tập thử không tạo tài khoản hoặc quyền vào tập.
 - **Khách hàng:** đăng ký, đăng nhập, khôi phục mật khẩu qua email, cập nhật hồ sơ được phép, chọn gói và ngày bắt đầu, theo dõi đơn/gói/lịch sử vào ra, gửi yêu cầu hủy đơn đang chờ.
 - **Nhân viên:** tìm và lọc đơn, ghi nhận nhiều khoản tiền mặt hoặc chuyển khoản, kiểm tra đã thu đủ rồi xác nhận; tra cứu hội viên, xem quyền tập, check-in/check-out và đóng lượt quên check-out kèm lý do; xử lý yêu cầu tập thử.
-- **Quản lý:** xem bảng điều khiển, doanh thu từ đơn đã thanh toán và tạo/sửa/mở/ngừng bán gói.
+- **Quản lý:** xem bảng điều khiển, doanh thu từ đơn đã thanh toán, tạo/sửa/mở/ngừng bán gói, và tạo/sửa tài khoản nhân viên.
+- **Trợ lý The Gym (RAG):** nhận câu hỏi nghiệp vụ tối đa 500 ký tự, chuyển đến dịch vụ RAG qua API và hiển thị câu trả lời cùng nguồn tài liệu. Nếu dịch vụ chưa chạy, website báo trợ lý tạm thời không sẵn sàng; các chức năng còn lại vẫn dùng được.
 
 ## Quy tắc quan trọng
 
@@ -30,7 +31,7 @@
 
 - PHP 8.3+, Laravel 13, MySQL 8+, Node.js 20.19+ hoặc 22.12+
 - Blade, Tailwind CSS 4 và Vite
-- PHPUnit; bộ kiểm thử dùng SQLite `:memory:` theo `phpunit.xml`
+- PHPUnit; bộ kiểm thử dùng MySQL riêng `qly_phonggym_test` theo `laravel/phpunit.xml`
 - Repository Pattern cho truy cập dữ liệu; Laravel policies cho quyền sở hữu đơn và thao tác nhân viên
 
 ## Chạy trên Windows/Laragon
@@ -61,6 +62,8 @@ php artisan serve
 
 Mở `http://127.0.0.1:8000`. Nếu Laragon đã cung cấp PHP, Composer, MySQL và Node.js trong PATH, có thể dùng các thành phần đó; nếu không, mở terminal từ Laragon hoặc thêm đường dẫn cài đặt tương ứng vào PATH.
 
+Chatbot cần dịch vụ RAG chạy riêng. Mặc định Laravel gọi `http://127.0.0.1:8090/chat`; cập nhật `RAG_API_URL` và `RAG_API_TIMEOUT` trong `.env` nếu dịch vụ chạy ở địa chỉ khác.
+
 ### Tài khoản mẫu local
 
 | Vai trò | Tên đăng nhập | Mật khẩu |
@@ -76,14 +79,14 @@ Các tài khoản trên chỉ phục vụ môi trường local. Khách hàng có
 
 ## Kiểm thử và build
 
-Chạy từ thư mục `laravel/`:
+Chạy từ thư mục `laravel/`. Trước khi chạy test, tạo database MySQL riêng tên `qly_phonggym_test` theo `phpunit.xml`; không trỏ cấu hình test vào database ứng dụng có dữ liệu.
 
 ```powershell
 php artisan test --compact
 npm run build
 ```
 
-Test tự động chạy trên SQLite trong bộ nhớ; nó không cần xóa hoặc làm mới database MySQL chứa dữ liệu chạy thử. Kế hoạch, phạm vi test thủ công và các điểm còn cần kiểm tra nằm trong [test plan](laravel/docs/test-plan.md).
+Test dùng database MySQL riêng và làm mới schema của database đó. Kế hoạch, kết quả test thủ công và các điểm còn cần kiểm tra nằm trong [test plan](laravel/docs/test-plan.md).
 
 ## Tài liệu
 

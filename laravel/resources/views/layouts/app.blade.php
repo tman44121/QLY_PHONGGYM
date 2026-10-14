@@ -44,6 +44,7 @@
                                     <ul class="mt-1 grid gap-1 rounded-xl border border-slate-200 bg-white p-2 shadow-lg md:absolute md:left-0 md:top-full md:z-50 md:min-w-52">
                                         <li><a class="block rounded-lg px-3 py-2 text-sm font-medium hover:bg-slate-50" href="{{ route('manager.dashboard') }}">Tổng quan</a></li>
                                         <li><a class="block rounded-lg px-3 py-2 text-sm font-medium hover:bg-slate-50" href="{{ route('manager.packages.index') }}">Quản lý gói tập</a></li>
+                                        <li><a class="block rounded-lg px-3 py-2 text-sm font-medium hover:bg-slate-50" href="{{ route('manager.employees.index') }}">Tài khoản nhân viên</a></li>
                                     </ul>
                                 </details>
                             </li>
@@ -123,5 +124,7 @@
             <p class="mt-6 border-t border-slate-200 pt-5 text-center text-xs text-slate-500">© {{ now(config('app.timezone'))->year }} The Gym · Tập luyện trong không gian không phán xét.</p>
         </div>
     </footer>
+
+    @include('components.chatbot')
 </body>
 </html>
