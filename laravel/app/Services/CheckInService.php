@@ -19,7 +19,7 @@ class CheckInService
     public function checkIn(string $identifier): CheckIn
     {
         return DB::transaction(function () use ($identifier): CheckIn {
-            $customer = $this->checkIns->findCustomerByIdentifier($identifier);
+            $customer = $this->checkIns->findCustomerByIdentifier($identifier, lockForUpdate: true);
 
             if (! $customer) {
                 throw ValidationException::withMessages(['member' => 'Không tìm thấy hội viên theo mã hoặc số điện thoại.']);

@@ -214,6 +214,8 @@ PublishScripts/
 *.snupkg
 # The packages folder can be ignored because of Package Restore
 **/[Pp]ackages/*
+# Keep the Laravel package pages; they are application views, not NuGet artifacts.
+!laravel/resources/views/packages/*.blade.php
 # except build/, which is used as an MSBuild target.
 !**/[Pp]ackages/build/
 # Uncomment if necessary however generally it will be regenerated when needed

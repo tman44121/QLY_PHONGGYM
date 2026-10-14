@@ -11,15 +11,14 @@ Verify the user-visible workflows in the agreed one-gym scope, and the added arc
 - Frontend build: `npm run build` runs Vite and compiles Tailwind CSS 4.
 - Manual responsive review: 360px phone, 768px tablet, and 1440px desktop. Check navigation, cards, tables, form labels, validation, focus visibility, and horizontal overflow.
 
-## Verification results — 4 October 2026
+## Verification results — 14 October 2026
 
-- `php artisan test --compact`: **passed**, 56 tests and 278 assertions. Added password recovery, staff trial-request handling, and manager package maintenance coverage.
-- `vendor/bin/pint --format agent`: **passed** for the 13 edited PHP files. The `--dirty` option could not run because this workspace has no `.git` directory.
-- `npm run build`: **passed**; Vite produced the Tailwind 4 CSS and application assets.
-- `php artisan migrate --no-interaction`: **passed**; the additive trial-request handling migration was applied to the local MySQL database. All eleven migrations report `Ran`.
-- `GET http://127.0.0.1:8000/`: **HTTP 200** from the running local app.
-- HTTP smoke checks: forgot-password and reset-form pages **200**; guest access to manager and staff pages **302** to sign in; public package list **200**.
-- Manual browser run: **key guest, manager, employee, and customer workflows completed**; see the executed cases below. Standard viewport, keyboard/focus, reduced-motion, and password-reset submission checks remain.
+- `php artisan test --compact`: **passed**, 60 tests and 315 assertions. PHPUnit uses the in-memory SQLite database configured in `phpunit.xml`.
+- `npm run build`: **passed**; Vite compiled the Tailwind CSS and application assets.
+- `vendor/bin/pint --dirty --format agent`: **passed** for modified PHP files.
+- `php artisan migrate:status --no-interaction`: **passed**; all 12 MySQL migrations are marked `Ran`.
+- Previous MySQL migration and HTTP smoke checks passed on 4 October 2026. The local preview uses MySQL; do not run destructive refresh commands against it.
+- The recorded direct browser run covers key guest, manager, employee, and customer workflows; see the dated cases below. Standard viewport, keyboard/focus, reduced-motion, and direct reset-password submission checks remain.
 
 ## Automated feature test cases
 
@@ -47,7 +46,7 @@ Verify the user-visible workflows in the agreed one-gym scope, and the added arc
 | PAY-03 | Staff | Confirm fully paid order twice | One paid order and exactly one membership | Covered |
 | PAY-04 | Customer | Submit a staff payment/confirmation action | HTTP 403; payment and membership are unchanged | Covered |
 | DATE-01 | Staff | Confirm an expired or overlapping start date | Validation error; order remains pending | Covered |
-| DATE-02 | Customer | Buy one month starting 31 January | Expiry is 28 February; last training date is 27 February | Covered for expiry |
+| DATE-02 | Customer | Buy one month starting 31 January | Exclusive expiry boundary is 1 March at 00:00; last training date is 28 February | Covered; passed |
 | CHECK-01 | Staff | Check in unpaid, future, or expired customer | Validation error; no visit is created | Covered |
 | CHECK-02 | Staff | Check in active customer twice without checkout | First visit is created; second is rejected | Covered |
 | CHECK-03 | Staff | Check out a visit | Checkout timestamp and staff identity are saved | Covered |
@@ -94,11 +93,12 @@ php artisan migrate:status --no-interaction
 
 The automated and server checks above are complete. Remaining acceptance work is limited to standardized viewport and accessibility checks, direct reset-password submission, and checking external mail delivery with SMTP configured.
 
-## Product gaps found during the test-plan review
+## Product gaps and scope boundaries
 
 - Trial requests can be reviewed and marked contacted by employees/managers. Call outcomes and staff assignment are not tracked beyond the person who marks contact.
 - Managers can create, edit, activate, and deactivate packages; package records are retained when they have order history.
 - Password recovery uses a single-use email reset link; this local environment currently uses the `log` mailer, so real mailbox delivery requires SMTP settings.
 - There is no staff account management screen.
-- Staff order lists are not paginated; check-in history is capped at the latest 50 records. Customer attendance is paginated.
-- Staff check-in is available by customer identifier; the flow does not have a separate identity-confirmation step before recording entry.
+- Staff orders and trial requests support filtering/pagination; staff check-in history is capped at the latest 50 visits, while customer attendance is paginated.
+- Staff check-in looks up a member by identifier or phone, then shows the member and active package for staff to compare before confirming entry.
+- Inventory/product sales, branches, PT, classes, online payment processing, and web-based refunds are outside the one-gym membership scope.

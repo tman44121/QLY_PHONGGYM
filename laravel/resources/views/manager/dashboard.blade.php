@@ -7,12 +7,12 @@
         <header class="mb-7">
             <p class="text-sm font-bold uppercase tracking-[0.18em] text-gym-blue">Khu vực quản lý</p>
             <h1 class="gym-title mt-2">Tổng quan The Gym</h1>
-            <p class="mt-2 text-slate-600">Tình hình hội viên và hoạt động trong ngày.</p>
+            <p class="mt-2 text-slate-600">Doanh thu và số hội viên là số tích lũy; gói hiệu lực và lượt đang tập tính tại hôm nay.</p>
         </header>
         <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-            <article class="gym-card"><p class="text-xs font-bold uppercase tracking-wide text-slate-500">Doanh thu đã xác nhận</p><p class="mt-3 text-2xl font-extrabold tabular-nums">{{ number_format($paidRevenue, 0, ',', '.') }} VNĐ</p></article>
-            <article class="gym-card"><p class="text-xs font-bold uppercase tracking-wide text-slate-500">Hội viên</p><p class="mt-3 text-4xl font-extrabold tabular-nums">{{ number_format($customerCount) }}</p></article>
-            <article class="gym-card"><p class="text-xs font-bold uppercase tracking-wide text-slate-500">Gói đang hiệu lực</p><p class="mt-3 text-4xl font-extrabold tabular-nums">{{ number_format($activeMembershipCount) }}</p></article>
+            <article class="gym-card"><p class="text-xs font-bold uppercase tracking-wide text-slate-500">Doanh thu đã xác nhận · toàn thời gian</p><p class="mt-3 text-2xl font-extrabold tabular-nums">{{ number_format($paidRevenue, 0, ',', '.') }} VNĐ</p></article>
+            <article class="gym-card"><p class="text-xs font-bold uppercase tracking-wide text-slate-500">Tài khoản hội viên · tổng</p><p class="mt-3 text-4xl font-extrabold tabular-nums">{{ number_format($customerCount) }}</p></article>
+            <article class="gym-card"><p class="text-xs font-bold uppercase tracking-wide text-slate-500">Gói đang hiệu lực · hôm nay</p><p class="mt-3 text-4xl font-extrabold tabular-nums">{{ number_format($activeMembershipCount) }}</p></article>
             <article class="gym-card"><p class="text-xs font-bold uppercase tracking-wide text-slate-500">Đơn chờ xác nhận</p><p class="mt-3 text-4xl font-extrabold tabular-nums">{{ number_format($pendingOrderCount) }}</p><a class="mt-3 inline-block font-semibold text-gym-blue underline underline-offset-4" href="{{ route('staff.orders.index') }}">Mở danh sách đơn</a></article>
             <article class="gym-card"><p class="text-xs font-bold uppercase tracking-wide text-slate-500">Lượt đang tập</p><p class="mt-3 text-4xl font-extrabold tabular-nums">{{ number_format($openVisitCount) }}</p><a class="mt-3 inline-block font-semibold text-gym-blue underline underline-offset-4" href="{{ route('staff.checkins.index') }}">Mở check-in</a></article>
         </div>

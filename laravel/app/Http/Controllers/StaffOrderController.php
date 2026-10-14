@@ -11,11 +11,17 @@ use Illuminate\View\View;
 
 class StaffOrderController extends Controller
 {
-    public function index(MembershipOrderRepository $orderRepository): View
+    public function index(Request $request, MembershipOrderRepository $orderRepository): View
     {
-        $orders = $orderRepository->forStaff()->get();
+        $filters = $request->validate([
+            'q' => ['nullable', 'string', 'max:100'],
+            'status' => ['nullable', 'in:pending,paid,cancelled'],
+        ]);
+        $orders = $orderRepository->forStaff($filters['q'] ?? null, $filters['status'] ?? null)
+            ->paginate(10)
+            ->withQueryString();
 
-        return view('staff.orders.index', ['orders' => $orders]);
+        return view('staff.orders.index', ['orders' => $orders, 'filters' => $filters]);
     }
 
     public function recordPayment(Request $request, MembershipOrder $order, MembershipOrderService $service): RedirectResponse

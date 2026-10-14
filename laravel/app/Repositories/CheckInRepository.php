@@ -26,7 +26,7 @@ class CheckInRepository
         return $customer->checkIns()->with(['membership.gymPackage'])->latest('checked_in_at');
     }
 
-    public function findCustomerByIdentifier(string $identifier): ?User
+    public function findCustomerByIdentifier(string $identifier, bool $lockForUpdate = false): ?User
     {
         $customerQuery = User::query()->where('role', 'customer');
 
@@ -38,7 +38,11 @@ class CheckInRepository
             $customerQuery->where('phone', $identifier);
         }
 
-        return $customerQuery->lockForUpdate()->first();
+        if ($lockForUpdate) {
+            $customerQuery->lockForUpdate();
+        }
+
+        return $customerQuery->first();
     }
 
     public function hasOpenVisit(User $customer): bool

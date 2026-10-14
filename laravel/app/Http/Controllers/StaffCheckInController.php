@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\CheckIn;
 use App\Repositories\CheckInRepository;
+use App\Repositories\MembershipRepository;
 use App\Services\CheckInService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -11,11 +12,30 @@ use Illuminate\View\View;
 
 class StaffCheckInController extends Controller
 {
-    public function index(CheckInRepository $checkInRepository): View
+    public function index(Request $request, CheckInRepository $checkInRepository, MembershipRepository $membershipRepository): View
     {
         $visits = $checkInRepository->staffHistory();
+        $selectedMember = $request->validate([
+            'member' => ['nullable', 'string', 'max:100'],
+        ])['member'] ?? '';
+        $memberPreview = null;
 
-        return view('staff.checkins.index', ['visits' => $visits]);
+        if ($selectedMember !== '') {
+            $customer = $checkInRepository->findCustomerByIdentifier($selectedMember);
+            $memberPreview = [
+                'customer' => $customer,
+                'membership' => $customer
+                    ? $membershipRepository->activeFor($customer, now(config('app.timezone'))->toDateString())
+                    : null,
+                'hasOpenVisit' => $customer ? $checkInRepository->hasOpenVisit($customer) : false,
+            ];
+        }
+
+        return view('staff.checkins.index', [
+            'visits' => $visits,
+            'selectedMember' => $selectedMember,
+            'memberPreview' => $memberPreview,
+        ]);
     }
 
     public function store(Request $request, CheckInService $service): RedirectResponse

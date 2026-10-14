@@ -34,7 +34,11 @@ class StaffCheckInTest extends TestCase
         $customer = User::factory()->create(['role' => 'customer']);
         $membership = $this->membershipFor($customer, '2026-10-10', '2026-11-10');
 
-        $response = $this->actingAs($staff)->from(route('staff.checkins.index'))
+        $response = $this->actingAs($staff)->get(route('staff.checkins.index', ['member' => $customer->phone]));
+
+        $response->assertOk()->assertSee($customer->name)->assertSee('Chưa có gói đang hiệu lực');
+
+        $response = $this->from(route('staff.checkins.index'))
             ->post(route('staff.checkins.store'), ['member' => $customer->phone]);
 
         $response->assertSessionHasErrors('member');
@@ -49,7 +53,10 @@ class StaffCheckInTest extends TestCase
         $customer = User::factory()->create(['role' => 'customer']);
         $this->membershipFor($customer, '2026-10-01', '2026-11-01');
 
-        $this->actingAs($staff)->from(route('staff.checkins.index'))
+        $this->actingAs($staff)->get(route('staff.checkins.index', ['member' => $customer->phone]))
+            ->assertOk()->assertSee($customer->name)->assertSee('Chưa có gói đang hiệu lực');
+
+        $this->from(route('staff.checkins.index'))
             ->post(route('staff.checkins.store'), ['member' => $customer->phone])
             ->assertSessionHasErrors('member');
 
@@ -63,7 +70,10 @@ class StaffCheckInTest extends TestCase
         $customer = User::factory()->create(['role' => 'customer']);
         $membership = $this->membershipFor($customer, '2026-10-01', '2026-11-01');
 
-        $this->actingAs($staff)->post(route('staff.checkins.store'), ['member' => $customer->phone])
+        $this->actingAs($staff)->get(route('staff.checkins.index', ['member' => $customer->phone]))
+            ->assertOk()->assertSee($customer->name)->assertSee($membership->gymPackage->name);
+
+        $this->post(route('staff.checkins.store'), ['member' => $customer->phone])
             ->assertRedirect(route('staff.checkins.index'));
 
         $this->assertDatabaseHas('check_ins', [
@@ -71,6 +81,9 @@ class StaffCheckInTest extends TestCase
             'membership_id' => $membership->id,
             'checked_out_at' => null,
         ]);
+
+        $this->get(route('staff.checkins.index', ['member' => $customer->phone]))
+            ->assertOk()->assertSee('chưa ghi giờ ra');
 
         $this->post(route('staff.checkins.store'), ['member' => $customer->phone])
             ->assertSessionHasErrors('member');

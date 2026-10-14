@@ -27,6 +27,7 @@ class MembershipRepository
     public function activeFor(User $customer, string $date, bool $lockForUpdate = false): ?Membership
     {
         $query = Membership::query()
+            ->with('gymPackage')
             ->where('user_id', $customer->id)
             ->whereDate('starts_on', '<=', $date)
             ->whereDate('expires_on', '>', $date)

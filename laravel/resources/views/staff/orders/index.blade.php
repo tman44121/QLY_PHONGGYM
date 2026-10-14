@@ -9,6 +9,12 @@
             <h1 class="gym-title mt-2">Đơn đăng ký gói tập</h1>
             <p class="mt-2 text-slate-600">Ghi từng khoản tiền nhận được, sau đó xác nhận khi đã thu đủ.</p>
         </header>
+        <form class="gym-card mb-6 grid gap-4 sm:grid-cols-[1fr_14rem_auto_auto] sm:items-end" method="GET" action="{{ route('staff.orders.index') }}">
+            <div><label class="gym-label" for="order-search">Tìm mã đơn, tên, số điện thoại hoặc gói</label><input class="gym-input" id="order-search" name="q" value="{{ $filters['q'] ?? '' }}" maxlength="100" placeholder="Ví dụ: 0901234567"></div>
+            <div><label class="gym-label" for="order-status">Trạng thái</label><select class="gym-input" id="order-status" name="status"><option value="">Tất cả trạng thái</option><option value="pending" @selected(($filters['status'] ?? '') === 'pending')>Đang chờ</option><option value="paid" @selected(($filters['status'] ?? '') === 'paid')>Đã thanh toán</option><option value="cancelled" @selected(($filters['status'] ?? '') === 'cancelled')>Đã hủy</option></select></div>
+            <button class="gym-btn-primary w-full sm:w-auto" type="submit">Lọc đơn</button>
+            <a class="gym-btn-outline w-full sm:w-auto" href="{{ route('staff.orders.index') }}">Xóa lọc</a>
+        </form>
         <div class="grid gap-5">
             @forelse ($orders as $order)
                 @php($received = (int) ($order->payments_sum_amount ?? 0))
@@ -80,6 +86,9 @@
                 <div class="gym-card py-10 text-center text-slate-600">Chưa có đơn đăng ký nào.</div>
             @endforelse
         </div>
+        @if ($orders->hasPages())
+            <nav class="mt-6" aria-label="Các trang đơn hội viên">{{ $orders->links() }}</nav>
+        @endif
     </section>
 @endsection
 

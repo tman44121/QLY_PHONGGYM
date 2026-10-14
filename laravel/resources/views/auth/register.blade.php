@@ -12,6 +12,7 @@
                 <form class="mt-6 grid gap-4 sm:grid-cols-2" method="POST" action="{{ route('register.store') }}">
                     @csrf
                     @if ($packageId > 0)<input type="hidden" name="package_id" value="{{ $packageId }}">@endif
+                    @if ($startDate)<input type="hidden" name="start_date" value="{{ $startDate }}">@endif
                     <div><label class="gym-label" for="name">Họ và tên</label><input class="gym-input" id="name" name="name" value="{{ old('name') }}" autocomplete="name" required></div>
                     <div><label class="gym-label" for="register-username">Tên đăng nhập</label><input class="gym-input" id="register-username" name="username" value="{{ old('username') }}" autocomplete="username" required></div>
                     <div><label class="gym-label" for="phone">Số điện thoại</label><input class="gym-input" id="phone" name="phone" type="tel" value="{{ old('phone') }}" autocomplete="tel" required></div>
@@ -20,7 +21,7 @@
                     <div><label class="gym-label" for="password_confirmation">Nhập lại mật khẩu</label><input class="gym-input" id="password_confirmation" name="password_confirmation" type="password" autocomplete="new-password" required></div>
                     <button class="gym-btn-primary w-full sm:col-span-2" type="submit">Tạo tài khoản</button>
                 </form>
-                <p class="mt-5 text-center text-sm text-slate-600">Đã có tài khoản? <a class="font-semibold text-gym-blue underline underline-offset-2" href="{{ route('login') }}">Đăng nhập</a></p>
+                <p class="mt-5 text-center text-sm text-slate-600">Đã có tài khoản? <a class="font-semibold text-gym-blue underline underline-offset-2" href="{{ route('login', array_filter(['package_id' => $packageId ?: null, 'start_date' => $startDate])) }}">Đăng nhập</a></p>
             </div>
         </div>
     </section>

@@ -26,13 +26,27 @@
                     <li><a class="block rounded-lg px-3 py-2 text-sm font-semibold uppercase tracking-wide text-slate-800 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-gym-blue" href="{{ route('home') }}#trial">Trải nghiệm miễn phí</a></li>
                     @auth
                         @if (in_array(auth()->user()->role, ['employee', 'manager'], true))
-                            <li><a class="block rounded-lg px-3 py-2 text-sm font-semibold uppercase tracking-wide text-slate-800 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-gym-blue" href="{{ route('staff.trial-requests.index') }}">Đăng ký tập thử</a></li>
-                            <li><a class="block rounded-lg px-3 py-2 text-sm font-semibold uppercase tracking-wide text-slate-800 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-gym-blue" href="{{ route('staff.checkins.index') }}">Check-in</a></li>
-                            <li><a class="block rounded-lg px-3 py-2 text-sm font-semibold uppercase tracking-wide text-slate-800 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-gym-blue" href="{{ route('staff.orders.index') }}">Đơn hội viên</a></li>
+                            <li class="relative">
+                                <details class="group">
+                                    <summary class="flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold uppercase tracking-wide text-slate-800 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-gym-blue">Vận hành <span aria-hidden="true">▾</span></summary>
+                                    <ul class="mt-1 grid gap-1 rounded-xl border border-slate-200 bg-white p-2 shadow-lg md:absolute md:left-0 md:top-full md:z-50 md:min-w-52">
+                                        <li><a class="block rounded-lg px-3 py-2 text-sm font-medium hover:bg-slate-50" href="{{ route('staff.trial-requests.index') }}">Đăng ký tập thử</a></li>
+                                        <li><a class="block rounded-lg px-3 py-2 text-sm font-medium hover:bg-slate-50" href="{{ route('staff.checkins.index') }}">Check-in hội viên</a></li>
+                                        <li><a class="block rounded-lg px-3 py-2 text-sm font-medium hover:bg-slate-50" href="{{ route('staff.orders.index') }}">Đơn hội viên</a></li>
+                                    </ul>
+                                </details>
+                            </li>
                         @endif
                         @if (auth()->user()->role === 'manager')
-                            <li><a class="block rounded-lg px-3 py-2 text-sm font-semibold uppercase tracking-wide text-slate-800 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-gym-blue" href="{{ route('manager.dashboard') }}">Quản lý</a></li>
-                            <li><a class="block rounded-lg px-3 py-2 text-sm font-semibold uppercase tracking-wide text-slate-800 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-gym-blue" href="{{ route('manager.packages.index') }}">Gói tập</a></li>
+                            <li class="relative">
+                                <details class="group">
+                                    <summary class="flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold uppercase tracking-wide text-slate-800 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-gym-blue">Quản lý <span aria-hidden="true">▾</span></summary>
+                                    <ul class="mt-1 grid gap-1 rounded-xl border border-slate-200 bg-white p-2 shadow-lg md:absolute md:left-0 md:top-full md:z-50 md:min-w-52">
+                                        <li><a class="block rounded-lg px-3 py-2 text-sm font-medium hover:bg-slate-50" href="{{ route('manager.dashboard') }}">Tổng quan</a></li>
+                                        <li><a class="block rounded-lg px-3 py-2 text-sm font-medium hover:bg-slate-50" href="{{ route('manager.packages.index') }}">Quản lý gói tập</a></li>
+                                    </ul>
+                                </details>
+                            </li>
                         @endif
                     @endauth
                 </ul>
@@ -67,6 +81,7 @@
     </nav>
 
     <div class="pt-20">
+        @if (request()->routeIs('home'))
         <section class="relative isolate h-56 overflow-hidden bg-slate-900 sm:h-72 lg:h-[26rem]" data-carousel aria-label="Hình ảnh The Gym">
             <div class="absolute inset-0" data-carousel-slide>
                 <img class="h-full w-full object-cover" src="{{ asset('images/csharp/poster.jpeg') }}" alt="Không gian tập luyện The Gym" width="1600" height="700" fetchpriority="high">
@@ -83,6 +98,7 @@
                 <button class="gym-btn-outline min-h-10 border-white/70 bg-slate-950/20 px-4 py-2 text-sm text-white hover:bg-white/15" type="button" data-carousel-next aria-label="Ảnh tiếp theo">Tiếp →</button>
             </div>
         </section>
+        @endif
     </div>
 
     @if (session('success'))

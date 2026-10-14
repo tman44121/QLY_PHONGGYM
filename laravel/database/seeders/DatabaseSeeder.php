@@ -53,8 +53,8 @@ class DatabaseSeeder extends Seeder
         GymPackage::query()->firstOrCreate(
             ['name' => 'Gói 12 tháng'],
             [
-                'description' => 'Tập luyện không giới hạn trong 12 tháng tại The Gym.',
-                'price' => 10000000,
+                'description' => 'Tập luyện không giới hạn trong 12 tháng tại The Gym. Tiết kiệm 399.000 VNĐ so với mua 12 gói tháng.',
+                'price' => 4389000,
                 'duration_months' => 12,
                 'is_active' => true,
             ],

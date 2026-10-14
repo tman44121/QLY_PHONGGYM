@@ -12,12 +12,13 @@
                 <form class="mt-6 space-y-4" method="POST" action="{{ route('login.store') }}">
                     @csrf
                     @if ($packageId > 0)<input type="hidden" name="package_id" value="{{ $packageId }}">@endif
+                    @if ($startDate)<input type="hidden" name="start_date" value="{{ $startDate }}">@endif
                     <div><label class="gym-label" for="username">Tên đăng nhập</label><input class="gym-input" id="username" name="username" value="{{ old('username') }}" autocomplete="username" required autofocus></div>
                     <div><label class="gym-label" for="password">Mật khẩu</label><input class="gym-input" id="password" name="password" type="password" autocomplete="current-password" required></div>
                     <p class="-mt-2 text-right text-sm"><a class="font-semibold text-gym-blue underline underline-offset-2" href="{{ route('password.request') }}">Quên mật khẩu?</a></p>
                     <button class="gym-btn-primary w-full" type="submit">Đăng nhập</button>
                 </form>
-                <p class="mt-5 text-center text-sm text-slate-600">Chưa là hội viên? <a class="font-semibold text-gym-blue underline underline-offset-2" href="{{ route('register', $packageId > 0 ? ['package_id' => $packageId] : []) }}">Tạo tài khoản</a></p>
+                <p class="mt-5 text-center text-sm text-slate-600">Chưa là hội viên? <a class="font-semibold text-gym-blue underline underline-offset-2" href="{{ route('register', array_filter(['package_id' => $packageId ?: null, 'start_date' => $startDate])) }}">Tạo tài khoản</a></p>
             </div>
         </div>
     </section>

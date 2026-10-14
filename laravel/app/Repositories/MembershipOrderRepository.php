@@ -27,11 +27,24 @@ class MembershipOrderRepository
     }
 
     /** @return Builder<MembershipOrder> */
-    public function forStaff(): Builder
+    public function forStaff(?string $search = null, ?string $status = null): Builder
     {
         return MembershipOrder::query()
             ->with(['user', 'gymPackage', 'payments.receiver', 'membership'])
             ->withSum('payments', 'amount')
+            ->when($status !== null, fn (Builder $query): Builder => $query->where('status', $status))
+            ->when($search !== null && $search !== '', function (Builder $query) use ($search): void {
+                $query->where(function (Builder $query) use ($search): void {
+                    if (ctype_digit($search)) {
+                        $query->whereKey((int) $search);
+                    }
+
+                    $query->orWhereHas('user', function (Builder $query) use ($search): void {
+                        $query->where('name', 'like', '%'.$search.'%')
+                            ->orWhere('phone', 'like', '%'.$search.'%');
+                    })->orWhereHas('gymPackage', fn (Builder $query): Builder => $query->where('name', 'like', '%'.$search.'%'));
+                });
+            })
             ->latest();
     }
 

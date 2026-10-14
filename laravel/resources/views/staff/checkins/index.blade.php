@@ -7,14 +7,46 @@
         <header class="mb-7">
             <p class="text-sm font-bold uppercase tracking-[0.18em] text-gym-blue">Khu vực nhân viên</p>
             <h1 class="gym-title mt-2">Check-in hội viên</h1>
-            <p class="mt-2 text-slate-600">Tra cứu bằng mã hội viên hoặc số điện thoại. Chỉ gói đã thanh toán và đang hiệu lực mới được vào tập.</p>
+            <p class="mt-2 text-slate-600">Tra cứu hội viên trước, đối chiếu tên và gói còn hiệu lực rồi mới ghi nhận vào tập.</p>
         </header>
         <div class="gym-card mb-8">
-            <form class="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end" method="POST" action="{{ route('staff.checkins.store') }}">
-                @csrf
-                <div><label class="gym-label" for="member">Mã hội viên hoặc số điện thoại</label><input class="gym-input" id="member" name="member" type="text" inputmode="numeric" autocomplete="off" value="{{ old('member') }}" placeholder="Ví dụ: 0901234567" required></div>
-                <button class="gym-btn-primary w-full sm:w-auto" type="submit">Ghi nhận vào tập</button>
+            <form class="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end" method="GET" action="{{ route('staff.checkins.index') }}">
+                <div><label class="gym-label" for="member">Mã hội viên hoặc số điện thoại</label><input class="gym-input" id="member" name="member" type="text" inputmode="numeric" autocomplete="off" value="{{ $selectedMember }}" placeholder="Ví dụ: 0901234567" required></div>
+                <button class="gym-btn-primary w-full sm:w-auto" type="submit">Tra cứu hội viên</button>
             </form>
+            @if ($memberPreview)
+                <section class="mt-5 rounded-2xl border p-5 {{ $memberPreview['customer'] && $memberPreview['membership'] && ! $memberPreview['hasOpenVisit'] ? 'border-emerald-200 bg-emerald-50' : 'border-amber-200 bg-amber-50' }}" aria-live="polite">
+                    @if (! $memberPreview['customer'])
+                        <h2 class="font-bold text-amber-950">Không tìm thấy hội viên</h2>
+                        <p class="mt-1 text-sm text-amber-900">Kiểm tra lại mã hội viên hoặc số điện thoại.</p>
+                    @else
+                        <div class="flex flex-wrap items-start justify-between gap-4">
+                            <div>
+                                <h2 class="text-lg font-bold text-slate-900">{{ $memberPreview['customer']->name }}</h2>
+                                <p class="text-sm text-slate-600">Mã hội viên #{{ $memberPreview['customer']->id }} · {{ $memberPreview['customer']->phone }}</p>
+                            </div>
+                            @if ($memberPreview['membership'])
+                                <div class="text-sm text-slate-700">
+                                    <p class="font-semibold">{{ $memberPreview['membership']->gymPackage->name }}</p>
+                                    <p>Hiệu lực đến hết {{ $memberPreview['membership']->expires_on->copy()->subDay()->format('d/m/Y') }}</p>
+                                </div>
+                            @endif
+                        </div>
+                        @if ($memberPreview['hasOpenVisit'])
+                            <p class="mt-4 font-semibold text-amber-950">Hội viên còn lượt tập chưa ghi giờ ra.</p>
+                        @elseif (! $memberPreview['membership'])
+                            <p class="mt-4 font-semibold text-amber-950">Chưa có gói đang hiệu lực hôm nay. Chỉ gói đã được nhân viên xác nhận mới được check-in.</p>
+                        @else
+                            <form class="mt-4 border-t border-emerald-200 pt-4" method="POST" action="{{ route('staff.checkins.store') }}">
+                                @csrf
+                                <input type="hidden" name="member" value="{{ $selectedMember }}">
+                                <p class="text-sm text-emerald-950">Hãy đối chiếu tên và số điện thoại với khách trước khi tiếp tục.</p>
+                                <button class="gym-btn-primary mt-3" type="submit">Xác nhận check-in cho {{ $memberPreview['customer']->name }}</button>
+                            </form>
+                        @endif
+                    @endif
+                </section>
+            @endif
         </div>
 
         <h2 class="mb-3 text-xl font-extrabold uppercase">Lịch sử lượt tập</h2>

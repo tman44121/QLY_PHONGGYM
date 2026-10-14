@@ -23,7 +23,7 @@ class PortalCoverageTest extends TestCase
         $this->get(route('packages.show', $package))
             ->assertOk()
             ->assertSee('Gói Sức Bền')
-            ->assertSee('Ngày tập cuối dự kiến');
+            ->assertSee('Ngày tập cuối nếu bắt đầu');
     }
 
     public function test_application_shell_has_skip_navigation_and_a_mobile_menu_control(): void
@@ -97,6 +97,100 @@ class PortalCoverageTest extends TestCase
             ->assertSee('value="'.$package->id.'"', false);
     }
 
+    public function test_guest_selected_start_date_survives_package_login_and_registration(): void
+    {
+        $this->travelTo('2026-10-02 09:00:00');
+        $package = GymPackage::factory()->create();
+        $selectedDate = '2026-10-20';
+
+        $this->get(route('packages.show', ['package' => $package, 'start_date' => $selectedDate]))
+            ->assertOk()
+            ->assertSee('value="'.$selectedDate.'"', false);
+
+        $this->get(route('login', ['package_id' => $package->id, 'start_date' => $selectedDate]))
+            ->assertOk()
+            ->assertSee('name="start_date"', false)
+            ->assertSee('value="'.$selectedDate.'"', false)
+            ->assertSee('href="'.e(route('register', ['package_id' => $package->id, 'start_date' => $selectedDate])).'"', false);
+
+        $this->get(route('register', ['package_id' => $package->id, 'start_date' => $selectedDate]))
+            ->assertOk()
+            ->assertSee('name="start_date"', false)
+            ->assertSee('value="'.$selectedDate.'"', false);
+
+        $customer = User::factory()->create([
+            'username' => 'date-return-member',
+            'password' => 'StrongPass123!',
+            'role' => 'customer',
+        ]);
+
+        $this->post(route('login.store'), [
+            'username' => $customer->username,
+            'password' => 'StrongPass123!',
+            'package_id' => $package->id,
+            'start_date' => $selectedDate,
+        ])->assertRedirect(route('packages.show', ['package' => $package, 'start_date' => $selectedDate]));
+
+        $this->post(route('logout'))->assertRedirect(route('home'));
+
+        $this->post(route('register.store'), [
+            'name' => 'Registered Member',
+            'username' => 'registered-member',
+            'phone' => '0909876543',
+            'email' => 'registered@example.test',
+            'password' => 'StrongPass123!',
+            'password_confirmation' => 'StrongPass123!',
+            'package_id' => $package->id,
+            'start_date' => $selectedDate,
+        ])->assertRedirect(route('packages.show', ['package' => $package, 'start_date' => $selectedDate]));
+    }
+
+    public function test_the_carousel_is_only_rendered_on_the_homepage(): void
+    {
+        $package = GymPackage::factory()->create();
+
+        $this->get(route('home'))->assertSee('data-carousel', false);
+        $this->get(route('packages.show', $package))->assertDontSee('data-carousel', false);
+    }
+
+    public function test_staff_order_search_and_status_filters_keep_pagination(): void
+    {
+        $staff = User::factory()->employee()->create();
+        $customer = User::factory()->create(['role' => 'customer', 'phone' => '0901234567']);
+        $otherCustomer = User::factory()->create(['role' => 'customer', 'phone' => '0907654321']);
+        $package = GymPackage::factory()->create();
+
+        MembershipOrder::factory()->count(11)->for($customer)->for($package, 'gymPackage')->create(['status' => 'pending']);
+        MembershipOrder::factory()->for($otherCustomer)->for($package, 'gymPackage')->paid()->create();
+
+        $this->actingAs($staff)->get(route('staff.orders.index', [
+            'q' => $customer->phone,
+            'status' => 'pending',
+        ]))
+            ->assertOk()
+            ->assertSee($customer->phone)
+            ->assertDontSee($otherCustomer->phone)
+            ->assertSee('page=2', false);
+    }
+
+    public function test_pending_order_shows_remaining_amount_and_transfer_note(): void
+    {
+        $customer = User::factory()->create(['role' => 'customer']);
+        $staff = User::factory()->employee()->create();
+        $package = GymPackage::factory()->create();
+        $order = MembershipOrder::factory()->for($customer)->for($package, 'gymPackage')->create([
+            'amount' => 399000,
+            'payment_method' => 'bank_transfer',
+        ]);
+        OrderPayment::factory()->for($order, 'order')->for($staff, 'receiver')->create(['amount' => 100000]);
+
+        $this->actingAs($customer)->get(route('my.orders.show', $order))
+            ->assertOk()
+            ->assertSee('299.000 VNĐ')
+            ->assertSee('THEGYM-DH-'.$order->id)
+            ->assertSee('chỉ được kích hoạt sau khi nhân viên ghi nhận đủ tiền và xác nhận đơn');
+    }
+
     public function test_login_returns_a_member_to_the_package_they_selected(): void
     {
         $package = GymPackage::factory()->create();
@@ -149,5 +243,6 @@ class PortalCoverageTest extends TestCase
 
         $this->assertDatabaseHas('users', ['username' => 'quanly', 'role' => 'manager']);
         $this->assertDatabaseHas('users', ['username' => 'nhanvien', 'role' => 'employee']);
+        $this->assertDatabaseHas('gym_packages', ['name' => 'Gói 12 tháng', 'price' => 4389000]);
     }
 }

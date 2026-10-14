@@ -29,6 +29,7 @@ class CustomerMembershipTest extends TestCase
 
     public function test_customer_creates_a_pending_order_at_the_current_package_price(): void
     {
+        $this->travelTo('2026-10-02 09:00:00');
         $customer = User::factory()->create(['role' => 'customer']);
         $package = GymPackage::factory()->create([
             'price' => 399000,

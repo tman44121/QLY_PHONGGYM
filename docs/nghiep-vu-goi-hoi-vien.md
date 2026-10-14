@@ -1,6 +1,6 @@
 # Nghiệp vụ khách hàng và gói hội viên
 
-**Phạm vi đồ án môn học:** Một phòng tập. Khách tạo tài khoản, mua gói, chọn ngày bắt đầu, xem thời hạn và lịch sử tập; nhân viên xác nhận tiền và check-in. Thanh toán là tiền mặt hoặc chuyển khoản được **nhân viên kiểm tra thủ công**. Không xây chi nhánh, cổng thanh toán, xác minh tài khoản nhiều bước, thông báo tự động hoặc hoàn tiền trên web.
+**Phạm vi đồ án môn học:** Một phòng tập. Khách tạo tài khoản, mua gói, chọn ngày bắt đầu, xem thời hạn và lịch sử tập; nhân viên xác nhận tiền và check-in. Thanh toán là tiền mặt hoặc chuyển khoản được **nhân viên kiểm tra thủ công**. Không xây quản lý tồn kho/sản phẩm, chi nhánh, PT, lớp học, cổng thanh toán, xác minh tài khoản nhiều bước, thông báo tự động hoặc hoàn tiền trên web.
 
 ## 1. Người tham gia và khái niệm
 
@@ -61,7 +61,7 @@ Khách hết hạn vẫn giữ tài khoản và lịch sử để gia hạn ho�
 
 Khách xem trạng thái trực tiếp trên web; đồ án không cần email nhắc hết hạn hoặc trang yêu cầu hoàn tiền.
 
-## 7. Đối chiếu với mã nguồn hiện tại
+## 7. Đối chiếu với dự án C# gốc
 
 - `AccountController` đã có đăng ký, đăng nhập, đăng xuất và khôi phục mật khẩu; trang chủ đã có biểu mẫu tập thử. `KHACHHANG` liên kết với gói, hóa đơn và check-in. Chưa có trang khách tự xem/sửa hồ sơ, “Đơn của tôi”, “Gói của tôi” hoặc lịch sử tập; menu đang có link `Account/Profile` nhưng controller chưa có action đó.
 - `GOITAP` đã có tên, giá, `THOIHAN`, mô tả; cần thống nhất `THOIHAN` là tháng. `DANGKYGOITAP` đã có khách, gói và ngày bắt đầu/kết thúc; khi triển khai phải lưu `NGAYKETTHUC` theo quy tắc mốc hết hạn ở mục 3. `HOADON`, `CHITIETHOADON.MADKGT` và `CHECKIN` có dữ liệu nền cho đơn, gói và lượt vào/ra. `HOADON` hiện chưa có trường riêng cho phương thức, thời điểm và nhân viên xác nhận tiền nếu muốn hiển thị lại các thông tin này.
@@ -69,7 +69,17 @@ Khách xem trạng thái trực tiếp trên web; đồ án không cần email n
 - Nút `Tham gia` hiện chưa dẫn tới luồng mua. `CartRepository.TaoHoaDon` chỉ tạo chi tiết cho hàng hóa và đánh dấu `BANK` là `Đã thanh toán` khi khách chọn phương thức; không được dùng nguyên quy tắc này để kích hoạt gói tập.
 - Trang chủ đang quảng bá gói “một chi nhánh/tất cả chi nhánh”; khi triển khai phạm vi một phòng tập cần sửa dòng giới thiệu đó cho đúng.
 
-## 8. Điều kiện nghiệm thu
+## 8. Đối chiếu với ứng dụng Laravel
+
+- Ứng dụng Laravel nằm trong `laravel/`; dùng MySQL khi chạy web, Tailwind CSS 4/Vite cho giao diện và PHPUnit với SQLite trong bộ nhớ khi kiểm thử.
+- Khách xem gói, đăng ký/đăng nhập, khôi phục mật khẩu, sửa hồ sơ được phép, đặt gói, xem đơn/gói/lịch sử tập và gửi yêu cầu hủy đơn đang chờ. Yêu cầu tập thử được lưu riêng, không tự cấp tài khoản hay quyền vào tập.
+- Nhân viên tìm/lọc đơn, ghi từng khoản tiền mặt hoặc chuyển khoản và chỉ xác nhận sau khi tổng tiền đã nhận đủ. Xác nhận tạo một kỳ hội viên; màn hình check-in tra cứu khách trước, hiển thị tên/gói/trạng thái để nhân viên đối chiếu rồi mới ghi lượt vào. Nhân viên ghi giờ ra hoặc đóng lượt quên check-out kèm lý do.
+- Quản lý xem dashboard, doanh thu từ đơn đã thanh toán, và tạo/sửa/mở/ngừng bán gói. Phân quyền được kiểm tra qua Laravel policies; truy cập dữ liệu được tổ chức trong các repository.
+- Gói mẫu hiện có: 1 tháng giá 399.000 VNĐ và 12 tháng giá 4.389.000 VNĐ. Seeder chỉ tạo tài khoản mẫu quản lý/nhân viên trong môi trường `local`.
+- Kỳ hạn dùng `Asia/Ho_Chi_Minh`; `expires_on` là ngày bắt đầu không còn quyền tập. Với gói một tháng bắt đầu 31/01/2026, ngày hết hạn là 01/03/2026 và ngày tập cuối là 28/02/2026.
+- **Ngoài phạm vi hiện thực:** tồn kho/sản phẩm, chi nhánh, PT, lớp học, cổng thanh toán, hoàn tiền trên web và xác minh tài khoản nhiều bước. Chuyển khoản được nhân viên đối soát thủ công.
+
+## 9. Điều kiện nghiệm thu
 
 1. Gửi biểu mẫu tập thử không tự tạo tài khoản hay quyền check-in. Khách đăng ký hợp lệ có thể đăng nhập ngay, không qua xác minh email; thông tin định danh trùng bị từ chối.
 2. Khách đã đăng nhập nhưng chưa mua gói thấy “Chưa có gói tập” và không được check-in. Khách chỉ xem hồ sơ, đơn và lịch sử của mình.

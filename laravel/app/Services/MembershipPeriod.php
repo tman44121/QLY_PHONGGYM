@@ -8,10 +8,15 @@ class MembershipPeriod
 {
     public function expiresOn(string|CarbonImmutable $startsOn, int $durationMonths): CarbonImmutable
     {
-        return CarbonImmutable::parse($startsOn, config('app.timezone'))
-            ->startOfDay()
-            ->addMonthsNoOverflow($durationMonths)
+        $startDate = CarbonImmutable::parse($startsOn, config('app.timezone'))
             ->startOfDay();
+        $expiresOn = $startDate->addMonthsNoOverflow($durationMonths)->startOfDay();
+
+        if ($expiresOn->day !== $startDate->day) {
+            return $expiresOn->startOfMonth()->addMonth()->startOfDay();
+        }
+
+        return $expiresOn;
     }
 
     public function lastTrainingDay(string|CarbonImmutable $expiresOn): CarbonImmutable

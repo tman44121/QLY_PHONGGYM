@@ -17,7 +17,9 @@ document.querySelectorAll('[data-carousel]').forEach((carousel) => {
     const showSlide = (index) => {
         activeIndex = (index + slides.length) % slides.length;
         slides.forEach((slide, slideIndex) => {
-            slide.hidden = slideIndex !== activeIndex;
+            const isHidden = slideIndex !== activeIndex;
+            slide.hidden = isHidden;
+            slide.classList.toggle('hidden', isHidden);
         });
 
         if (status) {
@@ -50,17 +52,15 @@ document.querySelectorAll('[data-membership-purchase]').forEach((form) => {
         const targetMonthLastDay = new Date(
             Date.UTC(targetMonth.getUTCFullYear(), targetMonth.getUTCMonth() + 1, 0),
         ).getUTCDate();
-        const finalDate = new Date(Date.UTC(
-            targetMonth.getUTCFullYear(),
-            targetMonth.getUTCMonth(),
-            Math.min(day, targetMonthLastDay),
-        ));
-        finalDate.setUTCDate(finalDate.getUTCDate() - 1);
+        const finalDate = day > targetMonthLastDay
+            ? new Date(Date.UTC(targetMonth.getUTCFullYear(), targetMonth.getUTCMonth() + 1, 0))
+            : new Date(Date.UTC(targetMonth.getUTCFullYear(), targetMonth.getUTCMonth(), day - 1));
 
         const formatted = [finalDate.getUTCDate(), finalDate.getUTCMonth() + 1, finalDate.getUTCFullYear()]
             .map((part) => String(part).padStart(2, '0'));
 
-        lastTrainingDay.textContent = 'Ngày tập cuối dự kiến: ' + formatted[0] + '/' + formatted[1] + '/' + formatted[2];
+        const startDate = [day, month, year].map((part) => String(part).padStart(2, '0')).join('/');
+        lastTrainingDay.textContent = 'Ngày tập cuối nếu bắt đầu ' + startDate + ': ' + formatted[0] + '/' + formatted[1] + '/' + formatted[2];
     };
 
     startDateInput.addEventListener('input', updateLastTrainingDay);

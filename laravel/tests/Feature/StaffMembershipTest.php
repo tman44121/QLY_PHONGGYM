@@ -36,6 +36,7 @@ class StaffMembershipTest extends TestCase
 
     public function test_confirmation_requires_full_received_amount(): void
     {
+        $this->travelTo('2026-10-02 09:00:00');
         $staff = User::factory()->create(['role' => 'employee']);
         $order = $this->pendingOrder();
         OrderPayment::factory()->for($order, 'order')->for($staff, 'receiver')->create(['amount' => 100000]);
@@ -50,6 +51,7 @@ class StaffMembershipTest extends TestCase
 
     public function test_full_confirmation_creates_one_membership_and_is_idempotent(): void
     {
+        $this->travelTo('2026-10-02 09:00:00');
         $staff = User::factory()->create(['role' => 'employee']);
         $order = $this->pendingOrder();
         OrderPayment::factory()->for($order, 'order')->for($staff, 'receiver')->create(['amount' => 399000]);
@@ -71,7 +73,7 @@ class StaffMembershipTest extends TestCase
         $this->assertDatabaseCount('order_payments', 1);
     }
 
-    public function test_one_month_membership_starting_on_january_31_expires_on_february_28(): void
+    public function test_one_month_membership_starting_on_january_31_expires_on_march_1(): void
     {
         $this->travelTo('2026-01-31 09:00:00');
         $staff = User::factory()->create(['role' => 'employee']);
@@ -90,7 +92,7 @@ class StaffMembershipTest extends TestCase
 
         $membership = Membership::query()->where('membership_order_id', $order->id)->firstOrFail();
         $this->assertSame('2026-01-31', $membership->starts_on->toDateString());
-        $this->assertSame('2026-02-28', $membership->expires_on->toDateString());
+        $this->assertSame('2026-03-01', $membership->expires_on->toDateString());
     }
 
     public function test_staff_must_replace_a_past_or_overlapping_start_date_before_confirmation(): void
@@ -123,6 +125,7 @@ class StaffMembershipTest extends TestCase
 
     public function test_customer_cannot_record_or_confirm_payment(): void
     {
+        $this->travelTo('2026-10-02 09:00:00');
         $customer = User::factory()->create(['role' => 'customer']);
         $order = $this->pendingOrder();
 

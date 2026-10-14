@@ -1,5 +1,7 @@
 # Laravel conversion implementation plan
 
+**Status:** Implemented. The approved C#-based UX direction was accepted and built in Laravel. The current automated suite passes; current results and remaining manual checks are recorded in [`laravel/docs/test-plan.md`](../../laravel/docs/test-plan.md).
+
 **Goal:** Rebuild the customer and gym membership workflow in `docs/nghiep-vu-goi-hoi-vien.md` as a Laravel application using MySQL, keeping the C# project as reference.
 
 **Architecture:** Put the new Laravel app in `laravel/`. Use Laravel's session authentication, Eloquent models and migrations, a small service for payment confirmation/membership dates, and a small service for check-in. Keep one web app and one MySQL database; do not port shop, PT, classes or Oracle-specific security features.
@@ -24,3 +26,10 @@
 - No customer action can mark an order paid or alter another customer's records.
 - The C# source remains intact; new work lives under `laravel/` and documentation.
 - UI is implemented only after the preview is accepted.
+
+## Completion record — 14 October 2026
+
+- Laravel app, MySQL migrations/seeds, customer and staff workflows, policies, repositories, and responsive Blade/Tailwind screens are implemented.
+- The user approved proceeding with the accepted C# UX/UI direction without further visual changes.
+- `php artisan test --compact`: passed, 60 tests and 315 assertions.
+- `npm run build`: passed. See the linked test plan for manual browser coverage and remaining viewport/accessibility checks.

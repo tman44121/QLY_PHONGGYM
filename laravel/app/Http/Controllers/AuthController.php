@@ -13,12 +13,28 @@ class AuthController extends Controller
 {
     public function showLogin(Request $request): View
     {
-        return view('auth.login', ['packageId' => $request->integer('package_id')]);
+        $validated = $request->validate([
+            'package_id' => ['nullable', 'integer', 'exists:gym_packages,id'],
+            'start_date' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:'.now(config('app.timezone'))->toDateString()],
+        ]);
+
+        return view('auth.login', [
+            'packageId' => (int) ($validated['package_id'] ?? 0),
+            'startDate' => $validated['start_date'] ?? null,
+        ]);
     }
 
     public function showRegistration(Request $request): View
     {
-        return view('auth.register', ['packageId' => $request->integer('package_id')]);
+        $validated = $request->validate([
+            'package_id' => ['nullable', 'integer', 'exists:gym_packages,id'],
+            'start_date' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:'.now(config('app.timezone'))->toDateString()],
+        ]);
+
+        return view('auth.register', [
+            'packageId' => (int) ($validated['package_id'] ?? 0),
+            'startDate' => $validated['start_date'] ?? null,
+        ]);
     }
 
     public function login(Request $request): RedirectResponse
@@ -27,15 +43,18 @@ class AuthController extends Controller
             'username' => ['required', 'string'],
             'password' => ['required', 'string'],
             'package_id' => ['nullable', 'integer', 'exists:gym_packages,id'],
+            'start_date' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:'.now(config('app.timezone'))->toDateString()],
         ]);
 
         $packageId = $credentials['package_id'] ?? null;
+        $startDate = $credentials['start_date'] ?? null;
         unset($credentials['package_id']);
+        unset($credentials['start_date']);
 
         if (! Auth::attempt($credentials)) {
             return back()->withErrors([
                 'username' => 'Tên đăng nhập hoặc mật khẩu chưa chính xác.',
-            ])->onlyInput('username');
+            ])->withInput($request->only('username', 'package_id', 'start_date'));
         }
 
         $request->session()->regenerate();
@@ -49,7 +68,10 @@ class AuthController extends Controller
         }
 
         if ($packageId !== null && $request->user()->role === 'customer') {
-            return redirect()->route('packages.show', ['package' => $packageId]);
+            return redirect()->route('packages.show', array_filter([
+                'package' => $packageId,
+                'start_date' => $startDate,
+            ], static fn (mixed $value): bool => $value !== null));
         }
 
         return redirect()->intended(route('my.memberships.index'));
@@ -64,6 +86,7 @@ class AuthController extends Controller
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'confirmed', Password::min(8)],
             'package_id' => ['nullable', 'integer', 'exists:gym_packages,id'],
+            'start_date' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:'.now(config('app.timezone'))->toDateString()],
         ]);
 
         $customer = User::query()->create([
@@ -79,7 +102,10 @@ class AuthController extends Controller
         $request->session()->regenerate();
 
         if (isset($validated['package_id'])) {
-            return redirect()->route('packages.show', ['package' => $validated['package_id']]);
+            return redirect()->route('packages.show', array_filter([
+                'package' => $validated['package_id'],
+                'start_date' => $validated['start_date'] ?? null,
+            ], static fn (mixed $value): bool => $value !== null));
         }
 
         return redirect()->route('my.memberships.index');

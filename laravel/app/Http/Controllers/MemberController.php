@@ -8,6 +8,7 @@ use App\Repositories\GymPackageRepository;
 use App\Repositories\MembershipRepository;
 use App\Services\MembershipOrderService;
 use App\Services\MembershipPeriod;
+use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -39,10 +40,17 @@ class MemberController extends Controller
     {
         abort_unless($package->is_active, 404);
 
+        $validated = $request->validate([
+            'start_date' => ['sometimes', 'date_format:Y-m-d', 'after_or_equal:'.now(config('app.timezone'))->toDateString()],
+        ]);
+
         $customer = $request->user()?->role === 'customer' ? $request->user() : null;
-        $suggestedStartDate = $customer
+        $defaultStartDate = $customer
             ? $orders->suggestedStartDate($customer)
             : now(config('app.timezone'))->startOfDay();
+        $suggestedStartDate = isset($validated['start_date'])
+            ? CarbonImmutable::parse($validated['start_date'], config('app.timezone'))->startOfDay()
+            : $defaultStartDate;
         $expiresOn = $period->expiresOn($suggestedStartDate, $package->duration_months);
 
         return view('packages.show', [
